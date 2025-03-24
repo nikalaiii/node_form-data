@@ -42,17 +42,21 @@ function createServer() {
             return;
           }
 
-          let expenseData = {};
+          let expenseData = [];
 
           try {
             const fileData = fs.readFileSync(expensePath, 'utf-8');
 
             expenseData = JSON.parse(fileData);
+
+            if (!Array.isArray(expenseData)) {
+              expenseData = [];
+            }
           } catch {
-            expenseData = {};
+            expenseData = [];
           }
 
-          expenseData = { ...parsedData };
+          expenseData.push(parsedData);
 
           fs.writeFileSync(expensePath, JSON.stringify(expenseData, null, 2));
 
