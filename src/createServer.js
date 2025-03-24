@@ -13,11 +13,9 @@ function createServer() {
 
       if (fs.existsSync(htmlPath)) {
         res.writeHead(200, { 'Content-Type': 'text/html' });
-        console.log('status 200, response html');
         res.end(fs.readFileSync(htmlPath));
       } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
-        console.log('status 404. error response html');
         res.end('File html not found');
       }
 
@@ -26,8 +24,6 @@ function createServer() {
 
     if (req.method === 'POST' && req.url === '/add-expense') {
       const expensePath = path.join(__dirname, '../', 'db', 'expense.json');
-
-      console.log('expensePath is ' + expensePath.toString());
 
       let data = '';
 
@@ -41,35 +37,29 @@ function createServer() {
 
           if (!parsedData.date || !parsedData.title || !parsedData.amount) {
             res.writeHead(400, { 'Content-Type': 'text/plain' });
-            console.log('status 400, data invalid');
             res.end('Invalid data format');
 
             return;
           }
 
-          let expenseData = [];
+          let expenseData = {};
 
           try {
             const fileData = fs.readFileSync(expensePath, 'utf-8');
 
             expenseData = JSON.parse(fileData);
-
-            if (!Array.isArray(expenseData)) {
-              expenseData = [];
-            }
           } catch {
-            expenseData = [];
+            expenseData = {};
           }
 
-          expenseData.push(parsedData);
+          expenseData = { ...parsedData };
+
           fs.writeFileSync(expensePath, JSON.stringify(expenseData, null, 2));
 
-          res.writeHead(302, { Location: '/' });
-          console.log('status 302, location');
-          res.end();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(expenseData, null, 2));
         } catch (err) {
           res.writeHead(500, { 'Content-Type': 'text/plain' });
-          console.log('status 500 catch eror');
           res.end(`Server error: ${err}`);
         }
       });
